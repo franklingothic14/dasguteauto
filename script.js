@@ -4,6 +4,10 @@ let wrongCount = 0;
 
 let mistakes = JSON.parse(localStorage.getItem("adjektivMistakes") || "[]");
 
+// НОВЕ: лог відповідей (зберігаємо останні N рядків)
+let answerLog = JSON.parse(localStorage.getItem("adjektivAnswerLog") || "[]");
+const LOG_LIMIT = 18;
+
 const nounEl = document.getElementById("noun");
 const englishEl = document.getElementById("english");
 const metaEl = document.getElementById("meta");
@@ -14,6 +18,9 @@ const wrongEl = document.getElementById("wrong");
 const mistakesEl = document.getElementById("mistakes");
 const clearBtn = document.getElementById("clear-mistakes");
 
+const logEl = document.getElementById("answer-log");
+const clearLogBtn = document.getElementById("clear-log");
+
 const CASES = ["Nom", "Akk", "Dat"];
 
 function rand(arr) {
@@ -21,7 +28,6 @@ function rand(arr) {
 }
 
 function expectedEndingWeak(casus, gender) {
-  // Слабка деклінація (тренуємо тільки e/en) [cite:27]
   if (gender === "pl") return "en";
   if (casus === "Nom") return "e";
   if (casus === "Akk" && (gender === "f" || gender === "n")) return "e";
@@ -32,6 +38,38 @@ function updateStats() {
   correctEl.textContent = `Richtig: ${correctCount}`;
   wrongEl.textContent = `Falsch: ${wrongCount}`;
   mistakesEl.textContent = `Adjektiv-Fehler: ${mistakes.length}`;
+}
+
+function escapeHtml(s) {
+  return String(s)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function renderLog() {
+  if (!answerLog.length) {
+    logEl.textContent = "—";
+    return;
+  }
+
+  // новіші вгорі
+  const html = answerLog.slice().reverse().map(row => {
+    const safe = escapeHtml(row.text);
+    const cls = row.ok ? "log-line" : "log-line log-wrong";
+    return `<span class="${cls}">${safe}</span>`;
+  }).join("");
+
+  logEl.innerHTML = html;
+}
+
+function pushLogLine(text, ok) {
+  answerLog.push({ text, ok, ts: Date.now() });
+  if (answerLog.length > LOG_LIMIT) answerLog = answerLog.slice(-LOG_LIMIT);
+  localStorage.setItem("adjektivAnswerLog", JSON.stringify(answerLog));
+  renderLog();
 }
 
 function pickRandomWord() {
@@ -54,7 +92,7 @@ function pickRandomWord() {
 
   englishEl.textContent = current.english;
 
-  // Прочерк в кінці прикметника: "schwarz____" (blank після stem) [cite:27]
+  // Прочерк в кінці прикметника
   nounEl.innerHTML =
     `${current.article} ` +
     `<span class="adj-gap">${current.adjStem}<span class="blank"></span></span> ` +
@@ -72,16 +110,18 @@ function handleAnswer(chosenWithDash) {
   const chosen = chosenWithDash.replace("-", "");
   const expected = current.correct;
 
-  console.log("Clicked:", chosen, "Expected:", expected);
-
+  const questionShown = `${current.article} ${current.adjStem}____ ${current.noun} (${current.casus})`;
   const correctPhrase = `${current.article} ${current.adjStem}${expected} ${current.noun}`;
 
   if (chosen === expected) {
     correctCount++;
     feedbackEl.innerHTML = `<span class="correct">✅ Richtig! ${correctPhrase}</span>`;
+    pushLogLine(`✅ ${questionShown} | du: -${chosen}`, true);
   } else {
     wrongCount++;
     feedbackEl.innerHTML = `<span class="wrong">❌ Falsch. Richtig: ${correctPhrase}</span>`;
+    pushLogLine(`❌ ${questionShown} | du: -${chosen} | richtig: -${expected}`, false);
+
     mistakes.push({ ...current, chosen, ts: Date.now() });
     localStorage.setItem("adjektivMistakes", JSON.stringify(mistakes));
   }
@@ -96,13 +136,21 @@ function clearMistakes() {
   updateStats();
 }
 
+function clearLog() {
+  answerLog = [];
+  localStorage.setItem("adjektivAnswerLog", "[]");
+  renderLog();
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   document.querySelectorAll("[data-ending]").forEach((btn) => {
     btn.addEventListener("click", (e) => handleAnswer(e.currentTarget.dataset.ending));
   });
 
   clearBtn.addEventListener("click", clearMistakes);
+  clearLogBtn.addEventListener("click", clearLog);
 
   updateStats();
+  renderLog();
   pickRandomWord();
 });
