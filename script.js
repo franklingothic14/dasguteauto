@@ -1,10 +1,8 @@
-// script.js
-
 let current = null;
 let correctCount = 0;
 let wrongCount = 0;
 
-let mistakes = JSON.parse(localStorage.getItem("adjektivMistakes") || "[]"); // safe parse pattern [web:53]
+let mistakes = JSON.parse(localStorage.getItem("adjektivMistakes") || "[]");
 
 const nounEl = document.getElementById("noun");
 const englishEl = document.getElementById("english");
@@ -23,16 +21,11 @@ function rand(arr) {
 }
 
 function expectedEndingWeak(casus, gender) {
-  // Schwache Deklination nach bestimmtem Artikel:
-  // -e тільки в Nom (m/f/n) та Akk (n/f), інакше -en; plural завжди -en у цій таблиці [cite:27]
+  // Мапа слабкої деклінації для цієї таблиці (закінчення тільки e/en) [cite:27]
   if (gender === "pl") return "en";
   if (casus === "Nom") return "e";
   if (casus === "Akk" && (gender === "f" || gender === "n")) return "e";
   return "en";
-}
-
-function buildCorrectPhrase(article, adjStem, ending, noun) {
-  return `${article} ${adjStem}${ending} ${noun}`;
 }
 
 function updateStats() {
@@ -60,7 +53,11 @@ function pickRandomWord() {
   };
 
   englishEl.textContent = current.english;
-  nounEl.textContent = `${current.article} ${current.adjStem} ${current.noun}`;
+
+  // Тут показуємо “пропуск” після прикметника
+  // innerHTML ок, бо дані беруться з нашого words.js, не від юзера; але загалом це sink, тож з user-input так не роблять [web:86]
+  nounEl.innerHTML = `${current.article} ${current.adjStem}<span class="blank"></span>${current.noun}`;
+
   metaEl.textContent = `Fall: ${current.casus} · Genus: ${current.gender}`;
   feedbackEl.innerHTML = "";
 
@@ -75,7 +72,7 @@ function handleAnswer(chosenWithDash) {
 
   console.log("Clicked:", chosen, "Expected:", expected);
 
-  const correctPhrase = buildCorrectPhrase(current.article, current.adjStem, expected, current.noun);
+  const correctPhrase = `${current.article} ${current.adjStem}${expected} ${current.noun}`;
 
   if (chosen === expected) {
     correctCount++;
