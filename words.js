@@ -1,6 +1,4 @@
 // words.js
-
-// Іменники (noun, gender: m/f/n/pl, en)
 const NOUNS = [
   { noun: "Rock", gender: "m", en: "skirt" },
   { noun: "Mantel", gender: "m", en: "coat" },
@@ -9,18 +7,18 @@ const NOUNS = [
 
   { noun: "T-Shirt", gender: "n", en: "t-shirt" },
   { noun: "Hemd", gender: "n", en: "shirt" },
+
   { noun: "Kleid", gender: "f", en: "dress" },
   { noun: "Bluse", gender: "f", en: "blouse" },
   { noun: "Hose", gender: "f", en: "trousers" },
-
   { noun: "Jacke", gender: "f", en: "jacket" },
+
   { noun: "Schuhe", gender: "pl", en: "shoes" },
   { noun: "Stiefel", gender: "pl", en: "boots" },
   { noun: "Socken", gender: "pl", en: "socks" },
   { noun: "Handschuhe", gender: "pl", en: "gloves" }
 ];
 
-// Прикметники (stem без закінчення)
 const ADJS = [
   { stem: "schwarz", en: "black" },
   { stem: "weiß", en: "white" },
@@ -40,7 +38,6 @@ const ADJS = [
   { stem: "bequem", en: "comfortable" }
 ];
 
-// Означені артиклі
 const ARTICLES = {
   Nom: { m: "der", n: "das", f: "die", pl: "die" },
   Akk: { m: "den", n: "das", f: "die", pl: "die" },
