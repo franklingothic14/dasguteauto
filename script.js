@@ -21,7 +21,7 @@ function rand(arr) {
 }
 
 function expectedEndingWeak(casus, gender) {
-  // Мапа слабкої деклінації для цієї таблиці (закінчення тільки e/en) [cite:27]
+  // Слабка деклінація (тренуємо тільки e/en) [cite:27]
   if (gender === "pl") return "en";
   if (casus === "Nom") return "e";
   if (casus === "Akk" && (gender === "f" || gender === "n")) return "e";
@@ -54,9 +54,11 @@ function pickRandomWord() {
 
   englishEl.textContent = current.english;
 
-  // Тут показуємо “пропуск” після прикметника
-  // innerHTML ок, бо дані беруться з нашого words.js, не від юзера; але загалом це sink, тож з user-input так не роблять [web:86]
-  nounEl.innerHTML = `${current.article} ${current.adjStem}<span class="blank"></span>${current.noun}`;
+  // Прочерк в кінці прикметника: "schwarz____" (blank після stem) [cite:27]
+  nounEl.innerHTML =
+    `${current.article} ` +
+    `<span class="adj-gap">${current.adjStem}<span class="blank"></span></span> ` +
+    `${current.noun}`;
 
   metaEl.textContent = `Fall: ${current.casus} · Genus: ${current.gender}`;
   feedbackEl.innerHTML = "";
@@ -67,7 +69,7 @@ function pickRandomWord() {
 function handleAnswer(chosenWithDash) {
   if (!current) return;
 
-  const chosen = chosenWithDash.replace("-", ""); // "-e" -> "e", "-en" -> "en"
+  const chosen = chosenWithDash.replace("-", "");
   const expected = current.correct;
 
   console.log("Clicked:", chosen, "Expected:", expected);
