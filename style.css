@@ -51,6 +51,16 @@ h1 {
   font-size: 13px;
 }
 
+/* Підкреслений “пропуск” під закінчення */
+.blank {
+  display: inline-block;
+  min-width: 54px;
+  border-bottom: 2px solid #91a3d8;
+  margin: 0 8px;
+  transform: translateY(-3px);
+}
+/* border-bottom як “лінія” — стандартний спосіб [web:77] */
+
 .feedback {
   min-height: 34px;
   margin: 12px 0 6px;
