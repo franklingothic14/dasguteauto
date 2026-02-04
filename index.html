@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adjektiv-Endungen Trainer</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Adjektiv-Endungen</h1>
+        <p>Practice weak declension after definite articles!</p>
+        
+        <div id="word-display">
+            <div id="english" class="english"></div>
+            <div id="noun" class="noun"></div>
+        </div>
+        
+        <div id="feedback" class="feedback"></div>
+        
+        <div class="buttons" id="buttons">
+            <button data-ending="-e">-e</button>
+            <button data-ending="-en">-en</button>
+        </div>
+        
+        <div class="stats">
+            <span id="correct">Correct: 0</span>
+            <span id="wrong">Wrong: 0</span>
+        </div>
+        
+        <div id="mistakes" class="mistakes-section">
+            <!-- Mistakes list will appear here -->
+        </div>
+        
+        <button id="clear-mistakes" class="clear-btn">Clear mistakes</button>
+    </div>
+    
+    <script src="words.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

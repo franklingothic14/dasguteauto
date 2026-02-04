@@ -1,0 +1,22 @@
+const WORDS = [
+    {noun: "T-Shirt", adj_stem: "weiß", case: "Akk", gender: "n", english: "the white t-shirt", correct: "e"},
+    {noun: "Rock", adj_stem: "schwarz", case: "Dat", gender: "m", english: "the black skirt", correct: "en"},
+    {noun: "Rock", adj_stem: "weiß", case: "Dat", gender: "m", english: "the white skirt", correct: "en"},
+    {noun: "Rock", adj_stem: "bequem", case: "Dat", gender: "m", english: "the comfortable skirt", correct: "en"},
+    {noun: "Rock", adj_stem: "schwarz", case: "Nom", gender: "m", english: "the black skirt", correct: "e"},
+    {noun: "Schuhe", adj_stem: "schwarz", case: "Akk", gender: "pl", english: "the black shoes", correct: "en"},
+    {noun: "Rock", adj_stem: "bequem", case: "Nom", gender: "m", english: "the comfortable skirt", correct: "e"},
+    {noun: "Rock", adj_stem: "bequem", case: "Akk", gender: "m", english: "the comfortable skirt", correct: "en"},
+    {noun: "T-Shirt", adj_stem: "bequem", case: "Nom", gender: "n", english: "the comfortable t-shirt", correct: "e"},
+    {noun: "Schuhe", adj_stem: "schwarz", case: "Dat", gender: "pl", english: "the black shoes", correct: "en"},
+    {noun: "Stiefel", adj_stem: "lang", case: "Nom", gender: "pl", english: "the long boots", correct: "en"},
+    {noun: "Kleid", adj_stem: "kurz", case: "Nom", gender: "f", english: "the short dress", correct: "e"},
+    {noun: "Stiefel", adj_stem: "neu", case: "Akk", gender: "pl", english: "the new boots", correct: "en"},
+    {noun: "Rock", adj_stem: "weit", case: "Dat", gender: "m", english: "the wide skirt", correct: "en"},
+    {noun: "Schuhe", adj_stem: "teuer", case: "Akk", gender: "pl", english: "the expensive shoes", correct: "en"},
+    {noun: "Hose", adj_stem: "lang", case: "Nom", gender: "f", english: "the long trousers", correct: "e"},
+    {noun: "Hose", adj_stem: "eng", case: "Dat", gender: "f", english: "the tight trousers", correct: "en"},
+    {noun: "Pullover", adj_stem: "teuer", case: "Dat", gender: "m", english: "the expensive sweater", correct: "en"},
+    {noun: "Pullover", adj_stem: "lang", case: "Dat", gender: "m", english: "the long sweater", correct: "en"},
+    {noun: "Rock", adj_stem: "neu", case: "Akk", gender: "m", english: "the new skirt", correct: "en"}
+];
