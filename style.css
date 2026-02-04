@@ -51,13 +51,8 @@ h1 {
   font-size: 13px;
 }
 
-/* Щоб stem + прочерк завжди були разом (не переносились) */
-.adj-gap {
-  white-space: nowrap;
-}
-/* white-space: nowrap забороняє перенос усередині елемента [web:113] */
+.adj-gap { white-space: nowrap; }
 
-/* Прочерк (лінія) прямо після stem */
 .blank {
   display: inline-block;
   width: 64px;
@@ -65,7 +60,6 @@ h1 {
   margin-left: 4px;
   transform: translateY(-3px);
 }
-/* border-bottom як “лінія” [web:110] */
 
 .feedback {
   min-height: 34px;
@@ -101,4 +95,33 @@ h1 {
   font-size: 14px;
   padding: 10px 12px;
   background: #0f1730;
+}
+
+/* ЛОГ */
+.log { padding-top: 14px; }
+.log-title {
+  font-size: 12px;
+  color: #91a3d8;
+  margin-bottom: 8px;
+  letter-spacing: 0.3px;
+}
+
+.log-body {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; /* monospace stack [web:132] */
+  font-size: 12px;
+  line-height: 1.5;
+  color: #b7c3e6;
+  background: #0d1426;
+  border: 1px solid #243255;
+  border-radius: 10px;
+  padding: 10px;
+  white-space: pre-wrap;
+}
+
+.log-line { display: block; }
+.log-wrong {
+  color: #ffd6e7;
+  background: rgba(255, 105, 180, 0.14); /* “pink” highlight via span [web:137] */
+  border-radius: 6px;
+  padding: 1px 6px;
 }
