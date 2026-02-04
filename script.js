@@ -4,7 +4,7 @@ let wrongCount = 0;
 
 let mistakes = JSON.parse(localStorage.getItem("adjektivMistakes") || "[]");
 
-// НОВЕ: лог відповідей (зберігаємо останні N рядків)
+// ЛОГ: останні N відповідей
 let answerLog = JSON.parse(localStorage.getItem("adjektivAnswerLog") || "[]");
 const LOG_LIMIT = 18;
 
@@ -40,29 +40,24 @@ function updateStats() {
   mistakesEl.textContent = `Adjektiv-Fehler: ${mistakes.length}`;
 }
 
-function escapeHtml(s) {
-  return String(s)
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
-}
-
 function renderLog() {
+  if (!logEl) return;
+
+  // рендеримо без innerHTML: стабільніше + без XSS
+  logEl.textContent = "";
   if (!answerLog.length) {
     logEl.textContent = "—";
     return;
   }
 
-  // новіші вгорі
-  const html = answerLog.slice().reverse().map(row => {
-    const safe = escapeHtml(row.text);
-    const cls = row.ok ? "log-line" : "log-line log-wrong";
-    return `<span class="${cls}">${safe}</span>`;
-  }).join("");
-
-  logEl.innerHTML = html;
+  // новіші зверху
+  const items = answerLog.slice().reverse();
+  for (const row of items) {
+    const line = document.createElement("div");
+    line.className = "log-line" + (row.ok ? "" : " log-wrong");
+    line.textContent = row.text;
+    logEl.appendChild(line);
+  }
 }
 
 function pushLogLine(text, ok) {
@@ -92,7 +87,6 @@ function pickRandomWord() {
 
   englishEl.textContent = current.english;
 
-  // Прочерк в кінці прикметника
   nounEl.innerHTML =
     `${current.article} ` +
     `<span class="adj-gap">${current.adjStem}<span class="blank"></span></span> ` +
@@ -100,8 +94,6 @@ function pickRandomWord() {
 
   metaEl.textContent = `Fall: ${current.casus} · Genus: ${current.gender}`;
   feedbackEl.innerHTML = "";
-
-  console.log("Generated:", current);
 }
 
 function handleAnswer(chosenWithDash) {
@@ -113,14 +105,18 @@ function handleAnswer(chosenWithDash) {
   const questionShown = `${current.article} ${current.adjStem}____ ${current.noun} (${current.casus})`;
   const correctPhrase = `${current.article} ${current.adjStem}${expected} ${current.noun}`;
 
+  // “пінг” у лог одразу при кліку (щоб було видно, що клік доходить)
+  // якщо далі щось впаде — ти все одно побачиш цей рядок
+  pushLogLine(`→ ${questionShown} | du klickst: -${chosen}`, true);
+
   if (chosen === expected) {
     correctCount++;
     feedbackEl.innerHTML = `<span class="correct">✅ Richtig! ${correctPhrase}</span>`;
-    pushLogLine(`✅ ${questionShown} | du: -${chosen}`, true);
+    pushLogLine(`✅ OK | ${correctPhrase}`, true);
   } else {
     wrongCount++;
     feedbackEl.innerHTML = `<span class="wrong">❌ Falsch. Richtig: ${correctPhrase}</span>`;
-    pushLogLine(`❌ ${questionShown} | du: -${chosen} | richtig: -${expected}`, false);
+    pushLogLine(`❌ WRONG | du: -${chosen} | richtig: -${expected} | ${correctPhrase}`, false);
 
     mistakes.push({ ...current, chosen, ts: Date.now() });
     localStorage.setItem("adjektivMistakes", JSON.stringify(mistakes));
@@ -143,12 +139,15 @@ function clearLog() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+  // safety: якщо елемента немає — ти б одразу побачив помилку раніше
+  if (!logEl) console.warn("Log element #answer-log not found");
+
   document.querySelectorAll("[data-ending]").forEach((btn) => {
     btn.addEventListener("click", (e) => handleAnswer(e.currentTarget.dataset.ending));
   });
 
-  clearBtn.addEventListener("click", clearMistakes);
-  clearLogBtn.addEventListener("click", clearLog);
+  clearBtn?.addEventListener("click", clearMistakes);
+  clearLogBtn?.addEventListener("click", clearLog);
 
   updateStats();
   renderLog();
