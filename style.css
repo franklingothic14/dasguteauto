@@ -51,15 +51,21 @@ h1 {
   font-size: 13px;
 }
 
-/* Підкреслений “пропуск” під закінчення */
+/* Щоб stem + прочерк завжди були разом (не переносились) */
+.adj-gap {
+  white-space: nowrap;
+}
+/* white-space: nowrap забороняє перенос усередині елемента [web:113] */
+
+/* Прочерк (лінія) прямо після stem */
 .blank {
   display: inline-block;
-  min-width: 54px;
+  width: 64px;
   border-bottom: 2px solid #91a3d8;
-  margin: 0 8px;
+  margin-left: 4px;
   transform: translateY(-3px);
 }
-/* border-bottom як “лінія” — стандартний спосіб [web:77] */
+/* border-bottom як “лінія” [web:110] */
 
 .feedback {
   min-height: 34px;
