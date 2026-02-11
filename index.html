@@ -1,45 +1,343 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Adjektiv-Endungen Trainer</title>
-  <link rel="stylesheet" href="style.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adjektivdeklination Trainer</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; background: #0b1220; color: #e8eefc; }
+        .container { max-width: 720px; margin: 0 auto; padding: 24px 16px 40px; }
+        h1 { margin: 0 0 6px; font-size: 28px; letter-spacing: 0.2px; }
+        .subtitle { margin: 0 0 18px; color: #b7c3e6; line-height: 1.4; }
+        .card { background: #111a2e; border: 1px solid #243255; border-radius: 14px; padding: 16px; margin: 14px 0; position: relative; }
+        /* English приховано */
+        .english { display: none; } 
+        .noun { font-size: 26px; line-height: 1.25; letter-spacing: 0.2px; margin-top: 10px; }
+        .meta { margin-top: 16px; color: #91a3d8; font-size: 13px; min-height: 18px; }
+        .meta.hidden { visibility: hidden; } /* Клас для приховування підказки */
+        
+        .feedback { min-height: 34px; margin: 12px 0 6px; font-size: 16px; font-weight: 600; }
+        .feedback.correct { color: #4ade80; }
+        .feedback.wrong { color: #fb7185; }
+        .buttons { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; margin: 10px 0 8px; }
+        .btn { padding: 12px 14px; font-size: 18px; border-radius: 12px; border: 1px solid #2c3b66; background: #172447; color: #e8eefc; cursor: pointer; }
+        .btn:hover { background: #1c2c56; }
+        .btn:active { transform: translateY(1px); }
+        .btn-secondary { margin-top: 10px; font-size: 14px; padding: 10px 12px; background: #0f1730; }
+        .stats { display: flex; gap: 20px; align-items: center; margin: 20px 0; flex-wrap: wrap; }
+        .correct { color: #4ade80; font-weight: 700; }
+        .wrong { color: #fb7185; font-weight: 700; }
+        .log { padding-top: 14px; }
+        .log-title { font-size: 12px; color: #91a3d8; margin-bottom: 8px; letter-spacing: 0.3px; }
+        .log-body { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace; font-size: 12px; line-height: 1.5; color: #b7c3e6; background: #0d1426; border: 1px solid #243255; border-radius: 10px; padding: 10px; white-space: pre-wrap; max-height: 200px; overflow-y: auto; }
+        .log-line { display: block; }
+        .log-wrong { color: #ffd6e7; background: rgba(255, 105, 180, 0.14); border-radius: 6px; padding: 1px 6px; }
+        
+        .underscore { 
+            display: inline-block; 
+            width: 30px; 
+            border-bottom: 2px solid #5a6b8c; 
+            margin: 0 4px; 
+            position: relative; 
+            top: -4px;
+        }
+
+        /* Toggle Switch Style */
+        .toggle-container { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-size: 14px; color: #b7c3e6; cursor: pointer; }
+        .toggle-input { accent-color: #4ade80; cursor: pointer; width: 16px; height: 16px; }
+
+        #error-box { display: none; background: #ef4444; color: white; padding: 15px; border-radius: 8px; margin-bottom: 20px; font-family: monospace; white-space: pre-wrap; border: 2px solid #b91c1c; }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Adjektiv-Endungen</h1>
-    <p class="subtitle">Übe die schwache Deklination nach bestimmten Artikeln (der/die/das)!</p>
+    <div class="container">
+        <div id="error-box"></div>
+        <h1>Adjektivdeklination</h1>
+        <p class="subtitle">Vollständige Sätze mit bestimmt/unbestimmt/kein/mein</p>
+        
+        <!-- Toggle Switch -->
+        <label class="toggle-container">
+            <input type="checkbox" id="hint-toggle" class="toggle-input" checked>
+            Unterstützung anzeigen (Fall/Genus)
+        </label>
 
-    <div id="word-display" class="card">
-      <div id="english" class="english">—</div>
-      <div id="noun" class="noun">—</div>
-      <div id="meta" class="meta">—</div>
+        <div class="card">
+            <div class="noun" id="noun"></div>
+            <!-- meta (підказка) -->
+            <div class="meta" id="meta"></div>
+            <div class="feedback" id="feedback"></div>
+            <div class="buttons">
+                <button class="btn" data-ending="-e">–e</button>
+                <button class="btn" data-ending="-en">-en</button>
+                <button class="btn" data-ending="-er">-er</button>
+                <button class="btn" data-ending="-es">-es</button>
+            </div>
+        </div>
+        <div class="stats">
+            <span id="correct" class="correct">Richtig: 0</span>
+            <span id="wrong" class="wrong">Falsch: 0</span>
+            <button class="btn btn-secondary" id="clear-mistakes">Mistakes löschen</button>
+        </div>
+        <div class="log">
+            <div class="log-title">Letzte Antworten</div>
+            <div class="log-body" id="answer-log"></div>
+            <button class="btn btn-secondary" id="clear-log">Log löschen</button>
+        </div>
     </div>
 
-    <div id="feedback" class="feedback"></div>
+    <script>
+    window.onerror = function(msg, url, lineNo, columnNo, error) {
+        const box = document.getElementById('error-box');
+        box.style.display = 'block';
+        box.textContent = `Error: ${msg}\nLine: ${lineNo}\nCheck console for details.`;
+        return false;
+    };
 
-    <div class="buttons">
-      <button class="btn" data-ending="-e">-e</button>
-      <button class="btn" data-ending="-en">-en</button>
-    </div>
+    try {
+        const NOUNS = [
+          { noun: "Rock", gender: "m", en: "skirt" }, { noun: "Mantel", gender: "m", en: "coat" },
+          { noun: "Pullover", gender: "m", en: "sweater" }, { noun: "Anzug", gender: "m", en: "suit" },
+          { noun: "T-Shirt", gender: "n", en: "t-shirt" }, { noun: "Hemd", gender: "n", en: "shirt" },
+          { noun: "Kleid", gender: "f", en: "dress" }, { noun: "Bluse", gender: "f", en: "blouse" },
+          { noun: "Hose", gender: "f", en: "trousers" }, { noun: "Jacke", gender: "f", en: "jacket" },
+          { noun: "Schuhe", gender: "pl", en: "shoes" }, { noun: "Stiefel", gender: "pl", en: "boots" },
+          { noun: "Socken", gender: "pl", en: "socks" }, { noun: "Handschuhe", gender: "pl", en: "gloves" },
+          { noun: "Mann", gender: "m", en: "man" }, { noun: "Junge", gender: "m", en: "boy" },
+          { noun: "Arzt", gender: "m", en: "doctor" }, { noun: "Lehrer", gender: "m", en: "teacher" },
+          { noun: "Mädchen", gender: "n", en: "girl" }, { noun: "Kind", gender: "n", en: "child" },
+          { noun: "Frau", gender: "f", en: "woman" }, { noun: "Ärztin", gender: "f", en: "female doctor" },
+          { noun: "Lehrerin", gender: "f", en: "female teacher" }, { noun: "Kinder", gender: "pl", en: "children" },
+          { noun: "Leute", gender: "pl", en: "people" }, { noun: "Baum", gender: "m", en: "tree" },
+          { noun: "Stuhl", gender: "m", en: "chair" }, { noun: "Haus", gender: "n", en: "house" },
+          { noun: "Auto", gender: "n", en: "car" }, { noun: "Stadt", gender: "f", en: "city" },
+          { noun: "Straße", gender: "f", en: "street" }, { noun: "Bäume", gender: "pl", en: "trees" },
+          { noun: "Autos", gender: "pl", en: "cars" }
+        ];
 
-    <div class="stats card">
-      <div><span id="correct">Richtig: 0</span></div>
-      <div><span id="wrong">Falsch: 0</span></div>
-      <div><span id="mistakes">Adjektiv-Fehler: 0</span></div>
-      <button id="clear-mistakes" class="btn btn-secondary">Fehlerliste löschen</button>
-    </div>
+        const ADJS = [
+          { stem: "schwarz", en: "black" }, { stem: "weiß", en: "white" }, { stem: "blau", en: "blue" },
+          { stem: "grün", en: "green" }, { stem: "rot", en: "red" }, { stem: "neu", en: "new" },
+          { stem: "alt", en: "old" }, { stem: "teuer", en: "expensive" }, { stem: "billig", en: "cheap" },
+          { stem: "schön", en: "beautiful" }, { stem: "groß", en: "big" }, { stem: "klein", en: "small" },
+          { stem: "warm", en: "warm" }, { stem: "kalt", en: "cold" }, { stem: "modern", en: "modern" },
+          { stem: "bequem", en: "comfortable" }, { stem: "schnell", en: "fast" }, { stem: "langsam", en: "slow" },
+          { stem: "hoch", en: "high" }, { stem: "niedrig", en: "low" }, { stem: "frisch", en: "fresh" },
+          { stem: "reich", en: "rich" }, { stem: "arm", en: "poor" }, { stem: "klug", en: "smart" },
+          { stem: "lustig", en: "funny" }, { stem: "traurig", en: "sad" }, { stem: "interessant", en: "interesting" },
+          { stem: "langweilig", en: "boring" }, { stem: "wichtig", en: "important" }, { stem: "leicht", en: "easy" },
+          { stem: "schwer", en: "difficult" }
+        ];
 
-    <!-- НОВЕ: короткий “термінальний” лог -->
-    <div class="card log">
-      <div class="log-title">Log (letzte Antworten)</div>
-      <div id="answer-log" class="log-body">—</div>
-      <button id="clear-log" class="btn btn-secondary">Log löschen</button>
-    </div>
-  </div>
+        const DEFARTICLES = {
+          Nom: { m: "der", n: "das", f: "die", pl: "die" },
+          Akk: { m: "den", n: "das", f: "die", pl: "die" },
+          Dat: { m: "dem", n: "dem", f: "der", pl: "den" }
+        };
 
-  <script src="words.js"></script>
-  <script src="script.js"></script>
+        const INDEFARTICLES = {
+          Nom: { m: "ein", n: "ein", f: "eine", pl: "" },
+          Akk: { m: "einen", n: "ein", f: "eine", pl: "" },
+          Dat: { m: "einem", n: "einem", f: "einer", pl: "" }
+        };
+
+        const KEINARTICLES = {
+          Nom: { m: "kein", n: "kein", f: "keine", pl: "keine" },
+          Akk: { m: "keinen", n: "kein", f: "keine", pl: "keine" },
+          Dat: { m: "keinem", n: "keinem", f: "keiner", pl: "keinen" }
+        };
+
+        const MEINARTICLES = {
+          Nom: { m: "mein", n: "mein", f: "meine", pl: "meine" },
+          Akk: { m: "meinen", n: "mein", f: "meine", pl: "meine" },
+          Dat: { m: "meinem", n: "meinem", f: "meiner", pl: "meinen" }
+        };
+
+        let current = null;
+        let correctCount = 0;
+        let wrongCount = 0;
+        let mistakes = []; 
+        let answerLog = [];
+
+        try { mistakes = JSON.parse(localStorage.getItem('adjektivMistakes')) || []; } catch(e) {}
+        try { answerLog = JSON.parse(localStorage.getItem('adjektivAnswerLog')) || []; } catch(e) {}
+
+        const LOGLIMIT = 18;
+        const CASES = ['Nom', 'Akk', 'Dat'];
+        const DETTYPES = ['def', 'indef', 'kein', 'mein'];
+
+        const CONTEXTTEMPLATES = {
+            Nom: { m: 'Das ist ', n: 'Das ist ', f: 'Das ist ', pl: 'Das sind ' },
+            Akk: { m: 'Ich sehe ', n: 'Ich sehe ', f: 'Ich sehe ', pl: 'Ich sehe ' },
+            Dat: { m: 'Ich gebe ', n: 'Ich gebe ', f: 'Ich gebe ', pl: 'Ich gebe ' }
+        };
+
+        function rand(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+        function expectedEnding(casus, gender, detType) {
+            if (gender === 'pl') {
+                if (detType === 'indef') {
+                    if (casus === 'Dat') return 'en';
+                    return 'e';
+                }
+                return 'en';
+            }
+            if (detType === 'def') {
+                if (casus === 'Nom') return 'e';
+                if (casus === 'Akk') return (gender === 'm') ? 'en' : 'e';
+                return 'en';
+            }
+            if (casus === 'Nom') {
+                if (gender === 'm') return 'er';
+                if (gender === 'n') return 'es';
+                return 'e';
+            }
+            if (casus === 'Akk') {
+                if (gender === 'm') return 'en';
+                if (gender === 'n') return 'es';
+                return 'e';
+            }
+            return 'en';
+        }
+
+        function initApp() {
+            const nounEl = document.getElementById('noun');
+            const metaEl = document.getElementById('meta');
+            const feedbackEl = document.getElementById('feedback');
+            const correctEl = document.getElementById('correct');
+            const wrongEl = document.getElementById('wrong');
+            const clearBtn = document.getElementById('clear-mistakes');
+            const logEl = document.getElementById('answer-log');
+            const clearLogBtn = document.getElementById('clear-log');
+            const hintToggle = document.getElementById('hint-toggle');
+
+            if (!nounEl) throw new Error("DOM Elements not found!");
+
+            // Обробник чекбокса для підказки
+            hintToggle.addEventListener('change', function() {
+                if (this.checked) {
+                    metaEl.classList.remove('hidden');
+                } else {
+                    metaEl.classList.add('hidden');
+                }
+            });
+
+            function updateStats() {
+                correctEl.textContent = `Richtig: ${correctCount}`;
+                wrongEl.textContent = `Falsch: ${wrongCount}`;
+            }
+
+            function renderLog() {
+                if (!logEl) return;
+                logEl.textContent = '';
+                if (!answerLog.length) return;
+                const items = answerLog.slice(-LOGLIMIT).reverse();
+                for (const row of items) {
+                    const line = document.createElement('div');
+                    line.className = `log-line ${row.ok ? '' : 'log-wrong'}`;
+                    line.textContent = row.text;
+                    logEl.appendChild(line);
+                }
+            }
+
+            function pushLogLine(text, ok) {
+                answerLog.push({ text, ok, ts: Date.now() });
+                if (answerLog.length > LOGLIMIT) {
+                    answerLog = answerLog.slice(-LOGLIMIT);
+                }
+                localStorage.setItem('adjektivAnswerLog', JSON.stringify(answerLog));
+                renderLog();
+            }
+
+            function pickRandomWord() {
+                const noun = rand(NOUNS);
+                const adj = rand(ADJS);
+                const casus = rand(CASES);
+                const detType = rand(DETTYPES);
+                const articlesObj = {
+                    def: DEFARTICLES,
+                    indef: INDEFARTICLES,
+                    kein: KEINARTICLES,
+                    mein: MEINARTICLES
+                }[detType];
+                
+                const article = articlesObj[casus][noun.gender];
+                const ending = expectedEnding(casus, noun.gender, detType);
+                const context = CONTEXTTEMPLATES[casus][noun.gender];
+                
+                current = {
+                    noun: noun.noun,
+                    gender: noun.gender,
+                    english: noun.en,
+                    adjStem: adj.stem,
+                    casus,
+                    detType,
+                    article,
+                    correct: ending,
+                    context
+                };
+                
+                let displayArticle = current.article ? current.article + ' ' : '';
+                nounEl.innerHTML = `${context}${displayArticle}${current.adjStem} <span class="underscore"></span> ${current.noun}.`;
+                metaEl.textContent = `Fall: ${casus} | Genus: ${noun.gender} | Typ: ${detType}`;
+                
+                feedbackEl.innerHTML = '&nbsp;';
+                feedbackEl.className = 'feedback';
+            }
+
+            function handleAnswer(chosenWithDash) {
+                if (!current) return;
+                const chosen = chosenWithDash.replace('-', '');
+                const expected = current.correct;
+                
+                let displayArticle = current.article ? current.article + ' ' : '';
+                const fullQuestion = `${current.context}${displayArticle}${current.adjStem} ${current.noun}`;
+                const correctPhrase = `${current.context}${displayArticle}${current.adjStem}${expected} ${current.noun}`;
+                
+                if (chosen === expected) {
+                    correctCount++;
+                    feedbackEl.innerHTML = `Richtig! ${correctPhrase}`;
+                    feedbackEl.className = 'feedback correct';
+                    pushLogLine(correctPhrase, true); 
+                } else {
+                    wrongCount++;
+                    feedbackEl.innerHTML = `Falsch: ${correctPhrase}`;
+                    feedbackEl.className = 'feedback wrong';
+                    pushLogLine(`${fullQuestion} → Sie: -${chosen}, richtig: -${expected}`, false);
+                    mistakes.push({ ...current, chosen, ts: Date.now() });
+                    localStorage.setItem('adjektivMistakes', JSON.stringify(mistakes));
+                }
+                updateStats();
+                setTimeout(pickRandomWord, 2000);
+            }
+
+            function clearMistakes() {
+                mistakes = [];
+                localStorage.setItem('adjektivMistakes', '');
+                updateStats();
+            }
+
+            function clearLog() {
+                answerLog = [];
+                localStorage.setItem('adjektivAnswerLog', '');
+                renderLog();
+            }
+
+            document.querySelectorAll('[data-ending]').forEach(btn => {
+                btn.addEventListener('click', e => handleAnswer(e.currentTarget.dataset.ending));
+            });
+            clearBtn?.addEventListener('click', clearMistakes);
+            clearLogBtn?.addEventListener('click', clearLog);
+
+            updateStats();
+            renderLog();
+            pickRandomWord();
+        }
+
+        document.addEventListener('DOMContentLoaded', initApp);
+    } catch (e) {
+        alert("Fatal Error: " + e.message);
+    }
+    </script>
 </body>
 </html>
